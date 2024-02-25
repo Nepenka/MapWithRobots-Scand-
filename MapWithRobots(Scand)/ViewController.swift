@@ -12,6 +12,8 @@ class ViewController: UIViewController {
     
     let settingsButton = UIButton(type: .custom)
     let warehouseMapView = WarehouseMapView()
+    let tableView = UITableView()
+    let startButton = UIButton()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -19,32 +21,66 @@ class ViewController: UIViewController {
         setupUI()
         let warehouse = createWarehouse()
         warehouseMapView.setupWarehouse(warehouse)
+        tableView.dataSource = self
+        tableView.delegate = self
+        tableView.register(TableViewCell.self, forCellReuseIdentifier: "cell")
+        setupTableViewHeader()
     }
     
     
     private func setupUI() {
         view.addSubview(settingsButton)
-        view.addSubview(warehouseMapView)
         settingsButton.setImage(UIImage(systemName: "gearshape.fill"), for: .normal)
         settingsButton.frame = CGRect(x: 150, y: 150, width: 200, height: 50)
-        
         
         settingsButton.snp.makeConstraints { setting in
             setting.top.equalToSuperview().offset(40)
             setting.right.equalToSuperview().inset(20)
             setting.height.equalTo(65)
             setting.width.equalTo(65)
-            
         }
         
         settingsButton.addTarget(self, action: #selector(settingsAction), for: .touchUpInside)
         
+        view.addSubview(warehouseMapView)
         warehouseMapView.snp.makeConstraints { map in
-            map.centerX.equalToSuperview().offset(60)
-            map.centerY.equalToSuperview().offset(30)
+            map.trailing.equalToSuperview().inset(20)
+            map.centerY.equalTo(view.snp.centerY)
             map.width.equalToSuperview().multipliedBy(0.5)
             map.height.equalToSuperview().multipliedBy(0.5)
         }
+        
+        view.addSubview(tableView)
+        tableView.snp.makeConstraints { table in
+            table.leading.equalToSuperview().offset(20)
+            table.trailing.equalTo(warehouseMapView.snp.leading).offset(-20)
+            table.width.equalTo(200)
+            table.centerY.equalTo(warehouseMapView.snp.centerY)
+            table.height.equalTo(warehouseMapView.snp.height)
+        }
+        
+        view.addSubview(startButton)
+        startButton.layer.borderColor = UIColor.black.cgColor
+        startButton.layer.borderWidth = 2.0
+        startButton.backgroundColor = .systemBlue
+        startButton.layer.cornerRadius = 12
+        startButton.layer.masksToBounds = true
+        startButton.setTitle("Start", for: .normal)
+        startButton.snp.makeConstraints { start in
+            start.centerX.equalTo(tableView)
+            start.top.equalTo(tableView.snp.bottom).offset(20)
+            start.width.equalTo(100)
+            start.height.equalTo(50)
+        }
+    }
+    
+    private func setupTableViewHeader() {
+        let tableViewHeader = UILabel()
+        tableViewHeader.text = "Logo"
+        tableViewHeader.font = UIFont.systemFont(ofSize: 24, weight: .bold)
+        tableViewHeader.textColor = .black
+        tableViewHeader.textAlignment = .center
+        tableView.tableHeaderView = tableViewHeader
     }
     
     @objc func settingsAction() {
@@ -79,4 +115,22 @@ class ViewController: UIViewController {
         return Warehouse(dimensions: dimensions, entrance: entrance, exit: exit, obstacles: obstacles, partitions: partitions, boxes: boxes)
     }
 
+}
+
+
+
+//MARK: - UICollectionViewDelegate, UICollectionViewDataSource
+
+extension ViewController: UITableViewDataSource, UITableViewDelegate {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return 10
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as! TableViewCell
+        cell.layer.borderColor = UIColor.black.cgColor
+        cell.layer.borderWidth = 1
+        
+        return cell
+    }
 }
