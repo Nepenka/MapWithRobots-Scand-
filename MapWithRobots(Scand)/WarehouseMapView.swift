@@ -8,7 +8,7 @@
 import UIKit
 
 class WarehouseMapView: UIView {
-
+    
     var warehouse: Warehouse?
     
     override init(frame: CGRect) {
@@ -29,10 +29,11 @@ class WarehouseMapView: UIView {
     override func draw(_ rect: CGRect) {
         super.draw(rect)
         
-        guard let warehouse = warehouse else {return}
+        guard let warehouse = warehouse else { return }
         
         let tileSize = CGSize(width: rect.width / CGFloat(warehouse.dimensions.width),
                               height: rect.height / CGFloat(warehouse.dimensions.height))
+        
         
         for obstacle in warehouse.obstacles {
             let obstacleRect = CGRect(x: CGFloat(obstacle.x) * tileSize.width,
@@ -43,15 +44,17 @@ class WarehouseMapView: UIView {
             UIBezierPath(rect: obstacleRect).fill()
         }
         
+        
         for partition in warehouse.partitions {
             let partitionRect = CGRect(x: CGFloat(partition.x) * tileSize.width,
                                        y: CGFloat(partition.y) * tileSize.height,
                                        width: tileSize.width,
                                        height: tileSize.height)
             
-            UIColor.blue.setFill()
+            UIColor.gray.setFill()
             UIBezierPath(rect: partitionRect).fill()
         }
+        
         
         for box in warehouse.boxes {
             let boxesRect = CGRect(x: CGFloat(box.position.x) * tileSize.width,
@@ -63,19 +66,37 @@ class WarehouseMapView: UIView {
             UIBezierPath(rect: boxesRect).fill()
         }
         
-        let entranceRect = CGRect(x: CGFloat(warehouse.entrance.x) * tileSize.width,
-                                  y: CGFloat(warehouse.entrance.y) * tileSize.height,
-                                  width: tileSize.width,
-                                  height: tileSize.height)
-        UIColor.orange.setFill()
-        UIBezierPath(rect: entranceRect).fill()
         
-        let exitRect = CGRect(x: CGFloat(warehouse.exit.x) * tileSize.width,
-                              y: CGFloat(warehouse.exit.y) * tileSize.height,
-                              width: tileSize.width,
-                              height: tileSize.height)
-        UIColor.purple.setFill()
-        UIBezierPath(rect: exitRect).fill()
+        drawLabelBackground(at: warehouse.entrance, with: tileSize, color: .white)
+        
+        drawLabel("Вход", at: warehouse.entrance, with: tileSize, color: .black)
+        
+        drawLabelBackground(at: warehouse.exit, with: tileSize, color: .white)
+        
+        drawLabel("Выход", at: warehouse.exit, with: tileSize, color: .black)
     }
-
+    
+    private func drawLabelBackground(at position: (x: Int, y: Int), with tileSize: CGSize, color: UIColor) {
+        let labelRect = CGRect(x: CGFloat(position.x) * tileSize.width,
+                               y: CGFloat(position.y) * tileSize.height,
+                               width: tileSize.width,
+                               height: tileSize.height)
+        
+        color.setFill()
+        UIBezierPath(rect: labelRect).fill()
+    }
+    
+    private func drawLabel(_ text: String, at position: (x: Int, y: Int), with tileSize: CGSize, color: UIColor) {
+        let labelRect = CGRect(x: CGFloat(position.x) * tileSize.width,
+                               y: CGFloat(position.y) * tileSize.height,
+                               width: tileSize.width,
+                               height: tileSize.height)
+        
+        let label = UILabel(frame: labelRect)
+        label.text = text
+        label.textAlignment = .center
+        label.textColor = color
+        
+        addSubview(label)
+    }
 }

@@ -27,7 +27,7 @@ class SettingController: UIViewController {
         view.addSubview(countLabel)
         
         roboStepper.minimumValue = 2
-        roboStepper.maximumValue = 4
+        roboStepper.maximumValue = 3
         roboStepper.value = 2
         
         roboStepper.addTarget(self, action: #selector(stepperValueChanged), for: .valueChanged)
