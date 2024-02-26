@@ -13,35 +13,51 @@ class SettingController: UIViewController {
     var roboImages: [UIImageView] = []
     let roboStepper = UIStepper(frame: CGRect(x: 50, y: 100, width: 200, height: 30))
     let countLabel = UILabel()
-    let button = UIButton()
+    let doneButton = UIButton()
 
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
         setupUI()
+        let initialRoboCount = UserDefaults.standard.integer(forKey: "RoboCount")
+        roboStepper.value = Double(initialRoboCount)
         countLabel.text = "\(Int(roboStepper.value))"
     }
     
     func setupUI() {
         view.addSubview(roboStepper)
-        view.addSubview(countLabel)
-        
         roboStepper.minimumValue = 2
         roboStepper.maximumValue = 3
         roboStepper.value = 2
         
         roboStepper.addTarget(self, action: #selector(stepperValueChanged), for: .valueChanged)
         
-        countLabel.textAlignment = .center
-        
         roboStepper.snp.makeConstraints { stepper in
             stepper.centerX.equalToSuperview()
             stepper.top.equalToSuperview().offset(120)
         }
         
+        view.addSubview(countLabel)
+        countLabel.textAlignment = .center
+        
         countLabel.snp.makeConstraints { label in
             label.centerX.equalToSuperview()
             label.top.equalTo(roboStepper.snp.bottom).offset(20)
+        }
+        
+        view.addSubview(doneButton)
+        doneButton.setTitle("Готово", for: .normal)
+        doneButton.layer.borderWidth = 2
+        doneButton.layer.borderColor = UIColor.black.cgColor
+        doneButton.backgroundColor = .systemBlue
+        doneButton.layer.cornerRadius = 12
+        doneButton.titleLabel?.font = UIFont(name: "Helvetica-Bold", size: 25)
+        doneButton.addTarget(self, action: #selector(doneButtonAction), for: .touchUpInside)
+        
+        doneButton.snp.makeConstraints { button in
+            button.top.equalTo(countLabel.snp.bottom).offset(120)
+            button.left.right.equalToSuperview().inset(95)
+            button.height.equalTo(60)
         }
         
         updateRoboImages()
@@ -84,8 +100,17 @@ class SettingController: UIViewController {
     }
     
     @objc func stepperValueChanged() {
-        countLabel.text = "\(Int(roboStepper.value))"
+        let roboCount = Int(roboStepper.value)
+        countLabel.text = "\(roboCount)"
+        UserDefaults.standard.set(roboCount, forKey: "RoboCount")
         updateRoboImages()
+    }
+    
+    @objc func doneButtonAction() {
+        let roboCount = Int(roboStepper.value)
+        UserDefaults.standard.set(roboCount, forKey: "RoboCount")
+        updateRoboImages()
+        dismiss(animated: true)
     }
 
 }

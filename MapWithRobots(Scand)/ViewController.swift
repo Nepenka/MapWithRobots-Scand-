@@ -14,6 +14,7 @@ class ViewController: UIViewController {
     let warehouseMapView = WarehouseMapView()
     let tableView = UITableView()
     let startButton = UIButton()
+    
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -24,7 +25,6 @@ class ViewController: UIViewController {
         tableView.dataSource = self
         tableView.delegate = self
         tableView.register(TableViewCell.self, forCellReuseIdentifier: "cell")
-        setupTableViewHeader()
     }
     
     
@@ -74,15 +74,6 @@ class ViewController: UIViewController {
         }
     }
     
-    private func setupTableViewHeader() {
-        let tableViewHeader = UILabel()
-        tableViewHeader.text = "Logo"
-        tableViewHeader.font = UIFont.systemFont(ofSize: 24, weight: .bold)
-        tableViewHeader.textColor = .black
-        tableViewHeader.textAlignment = .center
-        tableView.tableHeaderView = tableViewHeader
-    }
-    
     @objc func settingsAction() {
         let vc = SettingController()
         vc.modalPresentationStyle = .automatic
@@ -114,6 +105,8 @@ class ViewController: UIViewController {
         
         return Warehouse(dimensions: dimensions, entrance: entrance, exit: exit, obstacles: obstacles, partitions: partitions, boxes: boxes)
     }
+    
+    
 
 }
 
