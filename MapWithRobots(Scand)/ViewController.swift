@@ -14,8 +14,8 @@ class ViewController: UIViewController {
     let warehouseMapView = WarehouseMapView()
     let tableView = UITableView()
     let startButton = UIButton()
+    let tileSize = CGSize(width: 50, height: 50)
     
-
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
@@ -72,6 +72,36 @@ class ViewController: UIViewController {
             start.width.equalTo(100)
             start.height.equalTo(50)
         }
+        
+        startButton.addTarget(self, action: #selector(startButtonAction), for: .touchUpInside)
+        
+        addRobottoMap()
+    }
+    
+    private func addRobottoMap() {
+        let roboCount = UserDefaults.standard.integer(forKey: "RoboCount")
+        let roboImages = createRoboImages(count: roboCount)
+        for roboImage in roboImages {
+            warehouseMapView.addSubview(roboImage)
+        }
+    }
+    
+    private func createRoboImages(count: Int) -> [UIImageView] {
+        var roboImages: [UIImageView] = []
+        let imageSize = CGSize(width: 50, height: 50)
+        let spacing: CGFloat = 20
+        let entrancePosition = CGPoint(x: 2, y: 0)
+        
+        for index in 0..<count {
+            let roboImage = UIImageView(image: UIImage(named: "robots\(index + 1).png"))
+            roboImage.contentMode = .scaleAspectFit
+            let xPosition = entrancePosition.x * tileSize.width + CGFloat(index) * (imageSize.width + spacing)
+            let yPosition = entrancePosition.y * tileSize.height
+            roboImage.frame = CGRect(origin: CGPoint(x: xPosition, y: yPosition), size: imageSize)
+            roboImages.append(roboImage)
+        }
+        
+        return roboImages
     }
     
     @objc func settingsAction() {
@@ -80,12 +110,16 @@ class ViewController: UIViewController {
         present(vc, animated: true, completion: nil)
     }
     
+    @objc func startButtonAction() {
+        
+    }
+    
     private func createWarehouse() -> Warehouse {
         let dimensions = (width: 10, height: 8)
         let entrance = (x: 2, y: 0)
         let exit = (x: 9, y: 5)
         
-        let obstacles: [Partition] = [(x: 2, y: 3), (x: 5, y: 5)].map { Partition(x: $0.x, y: $0.y) }
+        let obstacles: [Partition] = [(x: 2, y: 3), (x: 5, y: 5), (x:4, y: 1), (x: 5, y: 6)].map { Partition(x: $0.x, y: $0.y) }
         let partitions: [Partition] = [
             (x: 0, y: 0), (x: 0, y: 1), (x: 0, y: 2), (x: 0, y: 3),
             (x: 0, y: 4), (x: 0, y: 5), (x: 0, y: 6), (x: 0, y: 7),
@@ -98,19 +132,14 @@ class ViewController: UIViewController {
         ].map { Partition(x: $0.x, y: $0.y) }
         
         let boxes: [Box] = [
-            Box(id: 1, position: Box.Position(x: 3, y: 2)),
-            Box(id: 2, position: Box.Position(x: 7, y: 6)),
-            Box(id: 3, position: Box.Position(x: 4, y: 4))
+            Box(id: 1, position: Box.Position(x: 3, y: 3)),
+            Box(id: 2, position: Box.Position(x: 4, y: 5)),
+            Box(id: 3, position: Box.Position(x: 6, y: 3))
         ]
         
         return Warehouse(dimensions: dimensions, entrance: entrance, exit: exit, obstacles: obstacles, partitions: partitions, boxes: boxes)
     }
-    
-    
-
 }
-
-
 
 //MARK: - UICollectionViewDelegate, UICollectionViewDataSource
 

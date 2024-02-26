@@ -33,6 +33,8 @@ enum Direction {
     case down
     case left
     case right
+    case none
+    
     
     var dx: Int {
         switch self {
@@ -40,7 +42,7 @@ enum Direction {
             return -1
         case .right:
             return 1
-        case .up, .down:
+        case .up, .down, .none:
             return 0
         }
     }
@@ -51,7 +53,7 @@ enum Direction {
             return -1
         case .down:
             return 1
-        case .left, .right:
+        case .left, .right, .none:
             return 0
         }
     }
