@@ -28,6 +28,13 @@ struct Boxing {
     var coordinate: Coordinate
 }
 
+struct RobotMessage {
+    let senderID: Int
+    let position: Coordinate
+    let action: Command
+    let intention: String
+}
+
 enum Direction {
     case up
     case down
@@ -64,3 +71,4 @@ enum Command {
     case turnLeft
     case turnRight
 }
+

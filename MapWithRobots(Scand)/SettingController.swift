@@ -14,6 +14,7 @@ class SettingController: UIViewController {
     let roboStepper = UIStepper(frame: CGRect(x: 50, y: 100, width: 200, height: 30))
     let countLabel = UILabel()
     let doneButton = UIButton()
+    
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -46,7 +47,7 @@ class SettingController: UIViewController {
         }
         
         view.addSubview(doneButton)
-        doneButton.setTitle("Готово", for: .normal)
+        doneButton.setTitle("Save", for: .normal)
         doneButton.layer.borderWidth = 2
         doneButton.layer.borderColor = UIColor.black.cgColor
         doneButton.backgroundColor = .systemBlue

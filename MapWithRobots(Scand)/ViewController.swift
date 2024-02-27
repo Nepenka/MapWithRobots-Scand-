@@ -14,7 +14,8 @@ class ViewController: UIViewController {
     let warehouseMapView = WarehouseMapView()
     let tableView = UITableView()
     let startButton = UIButton()
-    let tileSize = CGSize(width: 50, height: 50)
+    var messageQueue: [RobotMessage] = []
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -25,6 +26,7 @@ class ViewController: UIViewController {
         tableView.dataSource = self
         tableView.delegate = self
         tableView.register(TableViewCell.self, forCellReuseIdentifier: "cell")
+        
     }
     
     
@@ -75,33 +77,6 @@ class ViewController: UIViewController {
         
         startButton.addTarget(self, action: #selector(startButtonAction), for: .touchUpInside)
         
-        addRobottoMap()
-    }
-    
-    private func addRobottoMap() {
-        let roboCount = UserDefaults.standard.integer(forKey: "RoboCount")
-        let roboImages = createRoboImages(count: roboCount)
-        for roboImage in roboImages {
-            warehouseMapView.addSubview(roboImage)
-        }
-    }
-    
-    private func createRoboImages(count: Int) -> [UIImageView] {
-        var roboImages: [UIImageView] = []
-        let imageSize = CGSize(width: 50, height: 50)
-        let spacing: CGFloat = 20
-        let entrancePosition = CGPoint(x: 2, y: 0)
-        
-        for index in 0..<count {
-            let roboImage = UIImageView(image: UIImage(named: "robots\(index + 1).png"))
-            roboImage.contentMode = .scaleAspectFit
-            let xPosition = entrancePosition.x * tileSize.width + CGFloat(index) * (imageSize.width + spacing)
-            let yPosition = entrancePosition.y * tileSize.height
-            roboImage.frame = CGRect(origin: CGPoint(x: xPosition, y: yPosition), size: imageSize)
-            roboImages.append(roboImage)
-        }
-        
-        return roboImages
     }
     
     @objc func settingsAction() {
@@ -111,7 +86,24 @@ class ViewController: UIViewController {
     }
     
     @objc func startButtonAction() {
+        var map = createWarehouse()
         
+        let robot1 = Robot(coordinate: Coordinate(x: 1, y: 1), direction: .right, robotID: 1)
+        let robot2 = Robot(coordinate: Coordinate(x: 2, y: 2), direction: .down, robotID: 2)
+        
+        let allRobots = [robot1,robot2]
+        
+        robot1.delegate = self
+        robot2.delegate = self
+        
+        robot1.executeCommands(onMap: &map, robots: allRobots)
+        robot2.executeCommands(onMap: &map, robots: allRobots)
+        
+    }
+    
+    
+    private func updateTableView() {
+        tableView.reloadData()
     }
     
     private func createWarehouse() -> Warehouse {
@@ -145,14 +137,25 @@ class ViewController: UIViewController {
 
 extension ViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 10
+        return messageQueue.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as! TableViewCell
         cell.layer.borderColor = UIColor.black.cgColor
         cell.layer.borderWidth = 1
+        let message = messageQueue[indexPath.row]
+        cell.textLabel?.text = "\(message.senderID): \(message.intention)"
         
         return cell
+    }
+}
+
+//MARK: - RobotDelegate
+
+extension ViewController: RobotDelegate {
+    func robot(_ robot: Robot, didSendMessage message: RobotMessage) {
+        messageQueue.append(message)
+        updateTableView()
     }
 }

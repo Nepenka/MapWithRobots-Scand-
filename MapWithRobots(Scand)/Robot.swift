@@ -8,11 +8,17 @@
 import Foundation
 import UIKit
 
+
+protocol RobotDelegate: AnyObject {
+    func robot(_ robot: Robot, didSendMessage message: RobotMessage)
+}
+
 class Robot {
     var coordinate: Coordinate
     var direction: Direction
     var commands: [Command] = []
     var robotID: Int
+    weak var delegate: RobotDelegate?
 
     init(coordinate: Coordinate, direction: Direction, robotID: Int) {
         self.coordinate = coordinate
@@ -24,11 +30,11 @@ class Robot {
         commands.append(command)
     }
 
-    func executeCommands(onMap map: Map) {
+    func executeCommands(onMap map: inout Map, robots: [Robot]) {
         for command in commands {
             switch command {
             case .moveForward:
-                moveForward(onMap: map)
+                moveForward(onMap: &map, robots: robots)
             case .turnLeft:
                 turnLeft()
             case .turnRight:
@@ -37,37 +43,49 @@ class Robot {
         }
         commands.removeAll()
     }
-    
-    func pushBox(onMap map: inout Map, robots: [Robot]) {
+
+    private func moveForward(onMap map: inout Map, robots: [Robot]) {
         let nextCoordinate = getNextCoordinate()
-        
-        guard let boxIndex = map.boxes.firstIndex(where: { $0.coordinate == nextCoordinate }) else {
-            return
+
+        if let boxIndex = map.boxes.firstIndex(where: { $0.coordinate == nextCoordinate }) {
+            pushBoxTowardsExit(onMap: &map, boxIndex: boxIndex, robots: robots)
+        } else {
+            if isValidMove(to: nextCoordinate, onMap: map, robots: robots) {
+                coordinate = nextCoordinate
+            }
         }
-        
-        let exitDirection = calculateExitDirection(from: map, to: map.boxes[boxIndex].coordinate)
+
+        let message = RobotMessage(senderID: robotID, position: coordinate, action: .moveForward, intention: "Перемещение вперед")
+        delegate?.robot(self, didSendMessage: message)
+    }
+    
+    private func pushBoxTowardsExit(onMap map: inout Map, boxIndex: Int, robots: [Robot]) {
+        let box = map.boxes[boxIndex]
+        let exitDirection = calculateExitDirection(from: map, to: box.coordinate)
         
         guard exitDirection != .none else {
             return
         }
         
-        let nextBoxCoordinate = Coordinate(x: nextCoordinate.x + exitDirection.dx, y: nextCoordinate.y + exitDirection.dy)
+        let nextBoxCoordinate = Coordinate(x: box.coordinate.x + exitDirection.dx, y: box.coordinate.y + exitDirection.dy)
         
         guard isValidMove(to: nextBoxCoordinate, onMap: map, robots: robots) else {
             return
         }
         
-        map.boxes[boxIndex].coordinate = nextCoordinate
-        coordinate = nextCoordinate
-    }
-
-    private func moveForward(onMap map: Map) {
-        let nextCoordinate = getNextCoordinate()
-        if isValidMove(to: nextCoordinate, onMap: map, robots: []) {
-            coordinate = nextCoordinate
+        
+        let nextBoxIsBlocked = map.boxes.contains(where: { $0.coordinate == nextBoxCoordinate }) || robots.contains(where: { $0.coordinate == nextBoxCoordinate })
+        guard !nextBoxIsBlocked else {
+            return
         }
+        
+        map.boxes[boxIndex].coordinate = nextBoxCoordinate
+        coordinate = box.coordinate
+        
+        let message = RobotMessage(senderID: robotID, position: coordinate, action: .moveForward, intention: "Толкание ящика")
+        delegate?.robot(self, didSendMessage: message)
     }
-
+    
     private func getNextCoordinate() -> Coordinate {
         var nextCoordinate = coordinate
         switch direction {
@@ -84,25 +102,21 @@ class Robot {
         }
         return nextCoordinate
     }
-
+    
     private func isValidMove(to coordinate: Coordinate, onMap map: Map, robots: [Robot]) -> Bool {
         guard coordinate.x >= 0 && coordinate.x < map.dimensions.x &&
-              coordinate.y >= 0 && coordinate.y < map.dimensions.y else {
+                coordinate.y >= 0 && coordinate.y < map.dimensions.y else {
             return false
         }
-
+        
         if map.obstacles.contains(where: { $0 == coordinate }) {
             return false
         }
-
-        if map.boxes.contains(where: { $0.coordinate == coordinate }) {
-            return false
-        }
-
+        
         if robots.contains(where: { $0.coordinate == coordinate }) {
             return false
         }
-
+        
         return true
     }
     
@@ -115,7 +129,7 @@ class Robot {
             return .none
         }
     }
-
+    
     private func turnLeft() {
         switch direction {
         case .up:
@@ -130,7 +144,7 @@ class Robot {
             break
         }
     }
-
+    
     private func turnRight() {
         switch direction {
         case .up:
@@ -146,3 +160,4 @@ class Robot {
         }
     }
 }
+
