@@ -21,7 +21,19 @@ struct Map {
     var obstacles: [Coordinate]
     var partitions: [Coordinate]
     var boxes: [Boxing]
+
+    init(warehouse: Warehouse) {
+        dimensions = Coordinate(x: warehouse.dimensions.width, y: warehouse.dimensions.height)
+        entrance = Coordinate(x: warehouse.entrance.x, y: warehouse.entrance.y)
+        exit = Coordinate(x: warehouse.exit.x, y: warehouse.exit.y)
+        
+        obstacles = warehouse.obstacles.map { Coordinate(x: $0.x, y: $0.y) }
+        partitions = warehouse.partitions.map { Coordinate(x: $0.x, y: $0.y) }
+        
+        boxes = warehouse.boxes.map { Boxing(id: $0.id, coordinate: Coordinate(x: $0.position.x, y: $0.position.y)) }
+    }
 }
+
 
 struct Boxing {
     var id: Int

@@ -8,12 +8,17 @@
 import UIKit
 import SnapKit
 
+protocol SettingControllerDelegate: AnyObject {
+    func didChangeRoboStepperValue(_ value: Double)
+}
+
 class SettingController: UIViewController {
     
     var roboImages: [UIImageView] = []
     let roboStepper = UIStepper(frame: CGRect(x: 50, y: 100, width: 200, height: 30))
     let countLabel = UILabel()
     let doneButton = UIButton()
+    weak var delegate: SettingControllerDelegate?
     
 
     override func viewDidLoad() {
@@ -23,6 +28,7 @@ class SettingController: UIViewController {
         let initialRoboCount = UserDefaults.standard.integer(forKey: "RoboCount")
         roboStepper.value = Double(initialRoboCount)
         countLabel.text = "\(Int(roboStepper.value))"
+        updateRoboImages()
     }
     
     func setupUI() {
@@ -104,12 +110,15 @@ class SettingController: UIViewController {
         let roboCount = Int(roboStepper.value)
         countLabel.text = "\(roboCount)"
         UserDefaults.standard.set(roboCount, forKey: "RoboCount")
+        UserDefaults.standard.set(roboCount, forKey: "StepperValue")
         updateRoboImages()
+        delegate?.didChangeRoboStepperValue(roboStepper.value)
     }
     
     @objc func doneButtonAction() {
         let roboCount = Int(roboStepper.value)
         UserDefaults.standard.set(roboCount, forKey: "RoboCount")
+        UserDefaults.standard.set(roboCount, forKey: "StepperValue")
         updateRoboImages()
         dismiss(animated: true)
     }
