@@ -19,6 +19,7 @@ class Robot {
     var commands: [Command] = []
     var robotID: Int
     weak var delegate: RobotDelegate?
+    private var hasMoved: Bool = false
 
     init(coordinate: Coordinate, direction: Direction, robotID: Int) {
         self.coordinate = coordinate
@@ -44,20 +45,30 @@ class Robot {
         commands.removeAll()
     }
 
-    private func moveForward(onMap map: inout Map, robots: [Robot]) {
-        let nextCoordinate = getNextCoordinate()
+    
 
-        if let boxIndex = map.boxes.firstIndex(where: { $0.coordinate == nextCoordinate }) {
-            pushBoxTowardsExit(onMap: &map, boxIndex: boxIndex, robots: robots)
-        } else {
-            if isValidMove(to: nextCoordinate, onMap: map, robots: robots) {
-                coordinate = nextCoordinate
+    private func moveForward(onMap map: inout Map, robots: [Robot]) {
+            let nextCoordinate = getNextCoordinate()
+
+            if let boxIndex = map.boxes.firstIndex(where: { $0.coordinate == nextCoordinate }) {
+                pushBoxTowardsExit(onMap: &map, boxIndex: boxIndex, robots: robots)
+            } else {
+                if isValidMove(to: nextCoordinate, onMap: map, robots: robots) {
+                    coordinate = nextCoordinate
+                    if coordinate == map.exit && !hasMoved {
+                        let message = RobotMessage(senderID: robotID, position: coordinate, action: .moveForward, intention: "Робот достиг выхода")
+                        delegate?.robot(self, didSendMessage: message)
+                        hasMoved = true
+                    }
+                }
+            }
+
+            if !hasMoved {
+                let message = RobotMessage(senderID: robotID, position: coordinate, action: .moveForward, intention: "Перемещение вперед")
+                delegate?.robot(self, didSendMessage: message)
+                hasMoved = true
             }
         }
-
-        let message = RobotMessage(senderID: robotID, position: coordinate, action: .moveForward, intention: "Перемещение вперед")
-        delegate?.robot(self, didSendMessage: message)
-    }
     
     private func pushBoxTowardsExit(onMap map: inout Map, boxIndex: Int, robots: [Robot]) {
         let box = map.boxes[boxIndex]
@@ -82,8 +93,13 @@ class Robot {
         map.boxes[boxIndex].coordinate = nextBoxCoordinate
         coordinate = box.coordinate
         
-        let message = RobotMessage(senderID: robotID, position: coordinate, action: .moveForward, intention: "Толкание ящика")
-        delegate?.robot(self, didSendMessage: message)
+        if nextBoxCoordinate == map.exit { 
+            let message = RobotMessage(senderID: robotID, position: coordinate, action: .moveForward, intention: "Ящик доставлен до выхода")
+            delegate?.robot(self, didSendMessage: message)
+        } else {
+            let message = RobotMessage(senderID: robotID, position: coordinate, action: .moveForward, intention: "Толкание ящика")
+            delegate?.robot(self, didSendMessage: message)
+        }
     }
     
     private func getNextCoordinate() -> Coordinate {

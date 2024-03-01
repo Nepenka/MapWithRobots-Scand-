@@ -111,14 +111,16 @@ class ViewController: UIViewController {
     
     @objc func startButtonAction() {
         let initialCoordinate = Coordinate(x: 2, y: 1)
-        let initialDirection = Direction.up
+        let initialDirection = Direction.down
         
         let warehouse = createWarehouse()
+        
         
         var map = Map(warehouse: warehouse)
         let robots: [Robot] = []
         
         let robot = Robot(coordinate: initialCoordinate, direction: initialDirection, robotID: 1)
+        robot.delegate = self
         
         robot.addCommand(.moveForward)
         robot.addCommand(.turnLeft)
@@ -181,7 +183,7 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate {
 
 extension ViewController: RobotDelegate {
     func robot(_ robot: Robot, didSendMessage message: RobotMessage) {
-        messageQueue.append(message)
+        messageQueue.insert(message, at: 0)
         updateTableView()
     }
 }
