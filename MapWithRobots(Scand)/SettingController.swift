@@ -102,7 +102,7 @@ class SettingController: UIViewController {
                 image.size.equalTo(imageSize)
             }
             
-            previousRoboImage = roboImage 
+            previousRoboImage = roboImage
         }
     }
     

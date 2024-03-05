@@ -13,155 +13,110 @@ protocol RobotDelegate: AnyObject {
     func robot(_ robot: Robot, didSendMessage message: RobotMessage)
 }
 
-class Robot {
-    var coordinate: Coordinate
-    var direction: Direction
-    var commands: [Command] = []
-    var robotID: Int
-    weak var delegate: RobotDelegate?
-    private var hasMoved: Bool = false
 
-    init(coordinate: Coordinate, direction: Direction, robotID: Int) {
-        self.coordinate = coordinate
+class Robot {
+    
+    var partition: Partition
+    var direction: Direction
+    var command: [Command] = []
+    var robotID: Int = 0
+    var warehouse: Warehouse
+    var message: RobotMessage
+    weak var delegate: RobotDelegate?
+    
+    init(partition: Partition, direction: Direction, robotID: Int) {
+        self.partition = partition
         self.direction = direction
         self.robotID = robotID
     }
 
-    func addCommand(_ command: Command) {
-        commands.append(command)
-    }
-
-    func executeCommands(onMap map: inout Map, robots: [Robot]) {
-        for command in commands {
-            switch command {
-            case .moveForward:
-                moveForward(onMap: &map, robots: robots)
-            case .turnLeft:
-                turnLeft()
-            case .turnRight:
-                turnRight()
-            }
-        }
-        commands.removeAll()
-    }
-
     
-
-    private func moveForward(onMap map: inout Map, robots: [Robot]) {
-            let nextCoordinate = getNextCoordinate()
-
-            if let boxIndex = map.boxes.firstIndex(where: { $0.coordinate == nextCoordinate }) {
-                pushBoxTowardsExit(onMap: &map, boxIndex: boxIndex, robots: robots)
-            } else {
-                if isValidMove(to: nextCoordinate, onMap: map, robots: robots) {
-                    coordinate = nextCoordinate
-                    if coordinate == map.exit && !hasMoved {
-                        let message = RobotMessage(senderID: robotID, position: coordinate, action: .moveForward, intention: "Робот достиг выхода")
-                        delegate?.robot(self, didSendMessage: message)
-                        hasMoved = true
-                    }
-                }
-            }
-
-            if !hasMoved {
-                let message = RobotMessage(senderID: robotID, position: coordinate, action: .moveForward, intention: "Перемещение вперед")
-                delegate?.robot(self, didSendMessage: message)
-                hasMoved = true
-            }
+    func moveRobot(warehouse: Warehouse, robot: Robot, to target: Partition) {
+        guard (warehouse.boxes.sorted(by: { distanceBetween(p1: robot.partition, p2: $0.position) < distanceBetween(p1: robot.partition, p2: $1.position) }).first != nil)  else {
+          return
         }
-    
-    private func pushBoxTowardsExit(onMap map: inout Map, boxIndex: Int, robots: [Robot]) {
-        let box = map.boxes[boxIndex]
-        let exitDirection = calculateExitDirection(from: map, to: box.coordinate)
-        
-        guard exitDirection != .none else {
-            return
-        }
-        
-        let nextBoxCoordinate = Coordinate(x: box.coordinate.x + exitDirection.dx, y: box.coordinate.y + exitDirection.dy)
-        
-        guard isValidMove(to: nextBoxCoordinate, onMap: map, robots: robots) else {
-            return
-        }
-        
-        
-        let nextBoxIsBlocked = map.boxes.contains(where: { $0.coordinate == nextBoxCoordinate }) || robots.contains(where: { $0.coordinate == nextBoxCoordinate })
-        guard !nextBoxIsBlocked else {
-            return
-        }
-        
-        map.boxes[boxIndex].coordinate = nextBoxCoordinate
-        coordinate = box.coordinate
-        
-        if nextBoxCoordinate == map.exit { 
-            let message = RobotMessage(senderID: robotID, position: coordinate, action: .moveForward, intention: "Ящик доставлен до выхода")
-            delegate?.robot(self, didSendMessage: message)
-        } else {
-            let message = RobotMessage(senderID: robotID, position: coordinate, action: .moveForward, intention: "Толкание ящика")
+        if isObstacles(at: target) || isRobot(at: target) || isWall(at: target) {
+            turnRight()
+        }else{
+            self.partition = target
+            let message = RobotMessage(senderID: robotID, partition: partition, action: .turnRight, intention: "Передвинулся на \(partition)")
             delegate?.robot(self, didSendMessage: message)
         }
+      }
+
+    func distanceBetween(p1: Partition, p2: Box.Position) -> Double {
+        let diffX = p2.x - p1.x
+        let diffY = p2.y - p1.y
+        
+        return sqrt(pow(Double(diffX), 2) + pow(Double(diffY), 2))
+      }
+    
+    func isObstacles(at partition: Partition) -> Bool {
+        return warehouse.obstacles.contains(where: {$0.x == partition.x && $0.y == partition.y})
     }
     
-    private func getNextCoordinate() -> Coordinate {
-        var nextCoordinate = coordinate
-        switch direction {
-        case .up:
-            nextCoordinate.y -= 1
-        case .down:
-            nextCoordinate.y += 1
-        case .left:
-            nextCoordinate.x -= 1
-        case .right:
-            nextCoordinate.x += 1
-        case .none:
-            return nextCoordinate
-        }
-        return nextCoordinate
-    }
-    
-    private func isValidMove(to coordinate: Coordinate, onMap map: Map, robots: [Robot]) -> Bool {
-        guard coordinate.x >= 0 && coordinate.x < map.dimensions.x &&
-                coordinate.y >= 0 && coordinate.y < map.dimensions.y else {
-            return false
-        }
-        
-        if map.obstacles.contains(where: { $0 == coordinate }) {
-            return false
-        }
-        
-        if robots.contains(where: { $0.coordinate == coordinate }) {
-            return false
-        }
-        
+    func isRobot(at partition: Partition) -> Bool {
         return true
     }
     
-    private func calculateExitDirection(from map: Map, to coordinate: Coordinate) -> Direction {
-        if coordinate.x == map.exit.x {
-            return coordinate.y < map.exit.y ? .down : .up
-        } else if coordinate.y == map.exit.y {
-            return coordinate.x < map.exit.x ? .right : .left
-        } else {
-            return .none
-        }
+    func isWall(at partition: Partition) -> Bool {
+        let isPartitionWall = warehouse.partitions.contains(where: {$0.x == partition.x && $0.y == partition.y})
+        
+        let isOutsideWarehouse = partition.x < 0 || partition.y < 0
+            || partition.x >= warehouse.dimensions.width
+            || partition.y >= warehouse.dimensions.height
+        
+        return isPartitionWall || isOutsideWarehouse
     }
     
-    private func turnLeft() {
-        switch direction {
-        case .up:
-            direction = .left
-        case .down:
-            direction = .right
-        case .left:
-            direction = .down
-        case .right:
-            direction = .up
-        case .none:
-            break
+    func detectedBoxInFront() -> Int? {
+        let possiblePositions = [
+            (partition.x + direction.dx, partition.y + direction.dy),
+            (partition.x + direction.dx + direction.dy, partition.y + direction.dy - direction.dx),
+            (partition.x + direction.dx - direction.dy, partition.y + direction.dy + direction.dx)
+        ]
+        
+        for (_, position) in possiblePositions.enumerated() {
+            if let foundIndex = warehouse.boxes.firstIndex(where: {$0.position.x == position.0 && $0.position.y == position.1}) {
+                let message = RobotMessage(senderID: robotID, partition: partition, action: .turnRight, intention: "Ящик найден в \(position) с индексом \(foundIndex)")
+                delegate?.robot(self, didSendMessage: message)
+                return foundIndex
+            }
         }
+        
+        return nil
     }
     
-    private func turnRight() {
+    func pushBoxToExit() {
+        guard let boxIndex = detectedBoxInFront() else {
+            return
+        }
+
+        var box = warehouse.boxes[boxIndex]
+
+        let targetX = box.position.x + direction.dx
+        let targetY = box.position.y + direction.dy
+        let targetPartition = Partition(x: targetX, y: targetY)
+
+        if isObstacles(at: targetPartition) || isBox(at: targetPartition) {
+            return
+        }
+
+        box.position.x = targetX
+        box.position.y = targetY
+        self.partition = Partition(x: box.position.x, y: box.position.y)
+
+        warehouse.boxes[boxIndex] = box
+
+        let message = RobotMessage(senderID: robotID, partition: partition, action: .moveForward, intention: "Толкнул ящик на \(targetPartition)")
+        delegate?.robot(self, didSendMessage: message)
+    }
+    
+    func isBox(at partition: Partition) -> Bool {
+        return warehouse.boxes.contains(where: {$0.position.x == partition.x && $0.position.y == partition.y})
+    }
+    
+    func turnRight() {
         switch direction {
         case .up:
             direction = .right
@@ -176,4 +131,3 @@ class Robot {
         }
     }
 }
-

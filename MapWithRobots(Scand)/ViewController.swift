@@ -16,11 +16,6 @@ class ViewController: UIViewController {
     let startButton = UIButton()
     var messageQueue: [RobotMessage] = []
     private var robotImageView: [UIImageView] = []
-    private func setupSettingControllerDelegate() {
-        if let settingController = presentingViewController as? SettingController {
-            settingController.delegate = self
-        }
-    }
     
     
     override func viewDidLoad() {
@@ -84,24 +79,7 @@ class ViewController: UIViewController {
         startButton.addTarget(self, action: #selector(startButtonAction), for: .touchUpInside)
         
     }
-    
-    private func createRobotImages(_ count: Double) {
-        for imageView in robotImageView {
-            imageView.removeFromSuperview()
-        }
-        robotImageView.removeAll()
-        
-        let robotImageSize = CGSize(width: 50, height: 50)
-        let entrancePosition = CGPoint(x: 50, y: 100)
-        
-        for i in 0..<Int(count) {
-            let imageView = UIImageView(image: UIImage(named: "robots.png"))
-            imageView.frame.size = robotImageSize
-            imageView.center = CGPoint(x: entrancePosition.x + CGFloat(i) * (robotImageSize.width + 10), y: entrancePosition.y)
-            view.addSubview(imageView)
-            robotImageView.append(imageView)
-        }
-    }
+
     
     @objc func settingsAction() {
         let vc = SettingController()
@@ -110,24 +88,7 @@ class ViewController: UIViewController {
     }
     
     @objc func startButtonAction() {
-        let initialCoordinate = Coordinate(x: 2, y: 1)
-        let initialDirection = Direction.down
-        
-        let warehouse = createWarehouse()
-        
-        
-        var map = Map(warehouse: warehouse)
-        let robots: [Robot] = []
-        
-        let robot = Robot(coordinate: initialCoordinate, direction: initialDirection, robotID: 1)
-        robot.delegate = self
-        
-        robot.addCommand(.moveForward)
-        robot.addCommand(.turnLeft)
-        robot.addCommand(.moveForward)
-        
-        robot.executeCommands(onMap: &map, robots: robots)
-        print("Кнопка нажата")
+      
     }
     
     private func updateTableView() {
@@ -181,6 +142,7 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate {
 
 //MARK: - RobotDelegate
 
+
 extension ViewController: RobotDelegate {
     func robot(_ robot: Robot, didSendMessage message: RobotMessage) {
         messageQueue.insert(message, at: 0)
@@ -188,9 +150,3 @@ extension ViewController: RobotDelegate {
     }
 }
 
-//MARK: - SettingControllerDelegate
-extension ViewController: SettingControllerDelegate {
-    func didChangeRoboStepperValue(_ value: Double) {
-        createRobotImages(value)
-    }
-}

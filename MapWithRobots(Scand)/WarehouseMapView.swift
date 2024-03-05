@@ -10,7 +10,9 @@ import UIKit
 class WarehouseMapView: UIView {
     
     var warehouse: Warehouse?
-    
+
+    private(set) var tileSize: CGSize = .zero
+
     override init(frame: CGRect) {
         super.init(frame: frame)
         backgroundColor = .white
@@ -31,7 +33,7 @@ class WarehouseMapView: UIView {
         
         guard let warehouse = warehouse else { return }
         
-        let tileSize = CGSize(width: rect.width / CGFloat(warehouse.dimensions.width),
+        tileSize = CGSize(width: rect.width / CGFloat(warehouse.dimensions.width),
                               height: rect.height / CGFloat(warehouse.dimensions.height))
         
         
@@ -75,7 +77,26 @@ class WarehouseMapView: UIView {
         
         drawLabel("Выход", at: warehouse.exit, with: tileSize, color: .black)
     }
-    
+
+  func addRobot(at coordinate: Partition, robotView: UIView) {
+    guard let warehouse,
+          coordinate.x <= warehouse.dimensions.width,
+          coordinate.x >= 0,
+          coordinate.y <= warehouse.dimensions.height,
+          coordinate.y >= 0,
+          tileSize.width > .zero,
+          tileSize.height > .zero
+    else {
+      return
+    }
+
+    addSubview(robotView)
+    robotView.frame.size.width = tileSize.width
+    robotView.frame.size.height = tileSize.height
+    robotView.frame.origin = .init(x: CGFloat(coordinate.x) * tileSize.width,
+                                   y: CGFloat(coordinate.y) * tileSize.height)
+  }
+
     private func drawLabelBackground(at position: (x: Int, y: Int), with tileSize: CGSize, color: UIColor) {
         let labelRect = CGRect(x: CGFloat(position.x) * tileSize.width,
                                y: CGFloat(position.y) * tileSize.height,

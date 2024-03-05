@@ -10,7 +10,6 @@
 		9D0CD2842B8A2E5100C1AC00 /* WarehouseMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D0CD2832B8A2E5100C1AC00 /* WarehouseMapView.swift */; };
 		9DABAACB2B8B878C00002044 /* TableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DABAACA2B8B878C00002044 /* TableViewCell.swift */; };
 		9DABAACD2B8BB0C700002044 /* Robot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DABAACC2B8BB0C700002044 /* Robot.swift */; };
-		9DABAAD12B8BB2DE00002044 /* Map.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DABAAD02B8BB2DE00002044 /* Map.swift */; };
 		9DC04B802B87CD4A003ACDD2 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DC04B7F2B87CD4A003ACDD2 /* AppDelegate.swift */; };
 		9DC04B822B87CD4A003ACDD2 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DC04B812B87CD4A003ACDD2 /* SceneDelegate.swift */; };
 		9DC04B842B87CD4A003ACDD2 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DC04B832B87CD4A003ACDD2 /* ViewController.swift */; };
@@ -26,7 +25,6 @@
 		9D0CD2832B8A2E5100C1AC00 /* WarehouseMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WarehouseMapView.swift; sourceTree = "<group>"; };
 		9DABAACA2B8B878C00002044 /* TableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableViewCell.swift; sourceTree = "<group>"; };
 		9DABAACC2B8BB0C700002044 /* Robot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Robot.swift; sourceTree = "<group>"; };
-		9DABAAD02B8BB2DE00002044 /* Map.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Map.swift; sourceTree = "<group>"; };
 		9DC04B7C2B87CD4A003ACDD2 /* MapWithRobots(Scand).app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "MapWithRobots(Scand).app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		9DC04B7F2B87CD4A003ACDD2 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		9DC04B812B87CD4A003ACDD2 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -75,7 +73,6 @@
 				9DC04B832B87CD4A003ACDD2 /* ViewController.swift */,
 				9DC04B9C2B88C072003ACDD2 /* SettingController.swift */,
 				9D0CD2832B8A2E5100C1AC00 /* WarehouseMapView.swift */,
-				9DABAAD02B8BB2DE00002044 /* Map.swift */,
 				9DABAACC2B8BB0C700002044 /* Robot.swift */,
 				9DABAACA2B8B878C00002044 /* TableViewCell.swift */,
 				9DC04B972B88AF3E003ACDD2 /* Parser.swift */,
@@ -180,7 +177,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9DABAAD12B8BB2DE00002044 /* Map.swift in Sources */,
 				9DC04B982B88AF3E003ACDD2 /* Parser.swift in Sources */,
 				9DC04B842B87CD4A003ACDD2 /* ViewController.swift in Sources */,
 				9DC04B9D2B88C072003ACDD2 /* SettingController.swift in Sources */,
@@ -332,8 +328,8 @@
 				INFOPLIST_FILE = "MapWithRobots(Scand)/Info.plist";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -359,8 +355,8 @@
 				INFOPLIST_FILE = "MapWithRobots(Scand)/Info.plist";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

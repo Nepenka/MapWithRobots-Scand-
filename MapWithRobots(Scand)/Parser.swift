@@ -23,21 +23,82 @@ struct Warehouse: Decodable {
     let exit: (x: Int, y: Int)
     let obstacles: [Partition]
     let partitions: [Partition]
-    let boxes: [Box]
-}
-
-struct Box: Decodable {
-    let id: Int
-    let position: Position
+    var boxes: [Box]
     
-    struct Position: Decodable {
-        let x: Int
-        let y: Int
+    init(dimensions: (width: Int, height: Int), entrance: (x: Int, y: Int), exit: (x: Int, y: Int), obstacles: [Partition], partitions: [Partition], boxes: [Box]) {
+        self.dimensions = dimensions
+        self.entrance = entrance
+        self.exit = exit
+        self.obstacles = obstacles
+        self.partitions = partitions
+        self.boxes = boxes
     }
 }
 
-import Foundation
+struct Box: Decodable {
+    var id: Int
+    var position: Position
+    
+    struct Position: Decodable {
+        var x: Int
+        var y: Int
+        
+        init(x: Int, y: Int) {
+            self.x = x
+            self.y = y
+        }
+    }
+}
 
+struct RobotMessage {
+    let senderID: Int
+    let partition: Partition
+    let action: Command
+    let intention: String
+}
+
+
+enum Direction {
+    case up
+    case down
+    case left
+    case right
+    case none
+    
+    
+    var dx: Int {
+        switch self {
+        case .left:
+            return -1
+        case .right:
+            return 1
+        case .up, .down, .none:
+            return 0
+        }
+    }
+    
+    var dy: Int {
+        switch self {
+        case .up:
+            return -1
+        case .down:
+            return 1
+        case .left, .right, .none:
+            return 0
+        }
+    }
+}
+
+enum Command {
+    case moveForward
+    case turnLeft
+    case turnRight
+}
+
+
+
+import Foundation
+import UIKit
 
 
 
