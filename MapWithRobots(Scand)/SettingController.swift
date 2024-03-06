@@ -68,6 +68,7 @@ class SettingController: UIViewController {
         }
         
         updateRoboImages()
+        addInitialRobots()
     }
     
     
@@ -106,6 +107,20 @@ class SettingController: UIViewController {
         }
     }
     
+    func addInitialRobots() {
+        let warhouseMapView = WarehouseMapView()
+        let warehouse = warhouseMapView.warehouse
+        let roboCoordinates: [Partition] = [
+        Partition(x: 2, y: 1),
+        Partition(x: 3, y: 1),
+        Partition(x: 4, y: 1)
+        ]
+        for coordinate in roboCoordinates {
+            let robotView = UIImageView(image: UIImage(named: "robots.png"))
+            warhouseMapView.addRobot(at: coordinate, robotView: robotView)
+        }
+    }
+    
     @objc func stepperValueChanged() {
         let roboCount = Int(roboStepper.value)
         countLabel.text = "\(roboCount)"
@@ -120,6 +135,7 @@ class SettingController: UIViewController {
         UserDefaults.standard.set(roboCount, forKey: "RoboCount")
         UserDefaults.standard.set(roboCount, forKey: "StepperValue")
         updateRoboImages()
+        addInitialRobots()
         dismiss(animated: true)
     }
 

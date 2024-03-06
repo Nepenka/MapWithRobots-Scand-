@@ -14,35 +14,37 @@ protocol RobotDelegate: AnyObject {
 }
 
 
-class Robot {
+class Robot  {
     
     var partition: Partition
     var direction: Direction
     var command: [Command] = []
     var robotID: Int = 0
     var warehouse: Warehouse
-    var message: RobotMessage
     weak var delegate: RobotDelegate?
     
-    init(partition: Partition, direction: Direction, robotID: Int) {
+    
+    init(partition: Partition, direction: Direction, robotID: Int, warehouse: Warehouse) {
         self.partition = partition
         self.direction = direction
         self.robotID = robotID
+        self.warehouse = warehouse
     }
-
     
-    func moveRobot(warehouse: Warehouse, robot: Robot, to target: Partition) {
-        guard (warehouse.boxes.sorted(by: { distanceBetween(p1: robot.partition, p2: $0.position) < distanceBetween(p1: robot.partition, p2: $1.position) }).first != nil)  else {
-          return
+    
+    
+    func moveRobot(to target: Partition) {
+        guard (warehouse.boxes.sorted(by: { distanceBetween(p1: partition, p2: $0.position) < distanceBetween(p1: partition, p2: $1.position) }).first != nil)  else {
+            return
         }
         if isObstacles(at: target) || isRobot(at: target) || isWall(at: target) {
             turnRight()
-        }else{
+        } else {
             self.partition = target
             let message = RobotMessage(senderID: robotID, partition: partition, action: .turnRight, intention: "Передвинулся на \(partition)")
             delegate?.robot(self, didSendMessage: message)
         }
-      }
+    }
 
     func distanceBetween(p1: Partition, p2: Box.Position) -> Double {
         let diffX = p2.x - p1.x
@@ -56,7 +58,8 @@ class Robot {
     }
     
     func isRobot(at partition: Partition) -> Bool {
-        return true
+        let otherRobots = warehouse.robot.filter {$0.partition == partition && $0.robotID != self.robotID }
+        return !otherRobots.isEmpty
     }
     
     func isWall(at partition: Partition) -> Bool {

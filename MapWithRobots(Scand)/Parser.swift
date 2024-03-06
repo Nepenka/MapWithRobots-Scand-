@@ -24,6 +24,7 @@ struct Warehouse: Decodable {
     let obstacles: [Partition]
     let partitions: [Partition]
     var boxes: [Box]
+   // var robot: Robot
     
     init(dimensions: (width: Int, height: Int), entrance: (x: Int, y: Int), exit: (x: Int, y: Int), obstacles: [Partition], partitions: [Partition], boxes: [Box]) {
         self.dimensions = dimensions
@@ -32,6 +33,7 @@ struct Warehouse: Decodable {
         self.obstacles = obstacles
         self.partitions = partitions
         self.boxes = boxes
+        //self.robot = robot
     }
 }
 
@@ -136,5 +138,6 @@ extension Warehouse {
             obstacles = try container.decode([Partition].self, forKey: .obstacles)
             partitions = try container.decode([Partition].self, forKey: .partitions)
             boxes = try container.decode([Box].self, forKey: .boxes)
+            //robot = try container.decode(Robot.self, forKey: .robot)
         }
 }

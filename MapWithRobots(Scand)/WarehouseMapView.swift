@@ -76,9 +76,10 @@ class WarehouseMapView: UIView {
         drawLabelBackground(at: warehouse.exit, with: tileSize, color: .white)
         
         drawLabel("Выход", at: warehouse.exit, with: tileSize, color: .black)
+        
     }
 
-  func addRobot(at coordinate: Partition, robotView: UIView) {
+    func addRobot(at coordinate: Partition, robotView: UIView) {
     guard let warehouse,
           coordinate.x <= warehouse.dimensions.width,
           coordinate.x >= 0,
