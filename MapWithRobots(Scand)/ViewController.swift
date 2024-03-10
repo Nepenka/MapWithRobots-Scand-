@@ -18,6 +18,7 @@ class ViewController: UIViewController {
     private var robotImageView: [UIImageView] = []
     
     
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
@@ -88,7 +89,19 @@ class ViewController: UIViewController {
     }
     
     @objc func startButtonAction() {
-       
+        
+        /*
+        let warehouse = createWarehouse()
+        
+        let robot1 = Robot(partition: Partition(x: 0, y: 0), direction: .up, command: [], warehouse: warehouse)
+        
+        robot.delegate = self
+        
+        robot.moveRobot(to: warehouse.entrance)
+        robot.pushBoxToExit()
+        robot.detectedBoxInFront()
+         */
+        
       
     }
     
@@ -100,6 +113,7 @@ class ViewController: UIViewController {
         let dimensions = (width: 10, height: 8)
         let entrance = (x: 2, y: 0)
         let exit = (x: 9, y: 5)
+        let robots: [Robot] = []
         
         let obstacles: [Partition] = [(x: 2, y: 3), (x: 5, y: 5), (x:4, y: 1), (x: 5, y: 6)].map { Partition(x: $0.x, y: $0.y) }
         let partitions: [Partition] = [
@@ -119,7 +133,7 @@ class ViewController: UIViewController {
             Box(id: 3, position: Box.Position(x: 6, y: 3))
         ]
         
-        return Warehouse(dimensions: dimensions, entrance: entrance, exit: exit, obstacles: obstacles, partitions: partitions, boxes: boxes)
+        return Warehouse(dimensions: dimensions, entrance: entrance, exit: exit, obstacles: obstacles, partitions: partitions, boxes: boxes, robots: robots)
     }
 }
 

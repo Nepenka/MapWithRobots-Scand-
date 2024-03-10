@@ -24,16 +24,16 @@ struct Warehouse: Decodable {
     let obstacles: [Partition]
     let partitions: [Partition]
     var boxes: [Box]
-   // var robot: Robot
+    var robots: [Robot] = []
     
-    init(dimensions: (width: Int, height: Int), entrance: (x: Int, y: Int), exit: (x: Int, y: Int), obstacles: [Partition], partitions: [Partition], boxes: [Box]) {
+    init(dimensions: (width: Int, height: Int), entrance: (x: Int, y: Int), exit: (x: Int, y: Int), obstacles: [Partition], partitions: [Partition], boxes: [Box], robots: [Robot]) {
         self.dimensions = dimensions
         self.entrance = entrance
         self.exit = exit
         self.obstacles = obstacles
         self.partitions = partitions
         self.boxes = boxes
-        //self.robot = robot
+        self.robots = robots
     }
 }
 
@@ -60,7 +60,7 @@ struct RobotMessage {
 }
 
 
-enum Direction {
+enum Direction: Decodable {
     case up
     case down
     case left
@@ -124,7 +124,7 @@ func parser(from jsonString: String) -> Warehouse?  {
 
 extension Warehouse {
     private enum CodingKeys: String, CodingKey {
-            case dimensions, entrance, exit, obstacles, partitions, boxes
+            case dimensions, entrance, exit, obstacles, partitions, boxes, robots
         }
 
     init(from decoder: Decoder) throws {
@@ -138,6 +138,6 @@ extension Warehouse {
             obstacles = try container.decode([Partition].self, forKey: .obstacles)
             partitions = try container.decode([Partition].self, forKey: .partitions)
             boxes = try container.decode([Box].self, forKey: .boxes)
-            //robot = try container.decode(Robot.self, forKey: .robot)
+            robots = try container.decode([Robot].self, forKey: .robots)
         }
 }

@@ -14,23 +14,40 @@ protocol RobotDelegate: AnyObject {
 }
 
 
-class Robot  {
+class Robot: Decodable {
     
     var partition: Partition
     var direction: Direction
     var command: [Command] = []
     var robotID: Int = 0
     var warehouse: Warehouse
+    static var robotCounter = 0
     weak var delegate: RobotDelegate?
     
-    
-    init(partition: Partition, direction: Direction, robotID: Int, warehouse: Warehouse) {
-        self.partition = partition
-        self.direction = direction
-        self.robotID = robotID
-        self.warehouse = warehouse
+    required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.partition = try container.decode(Partition.self, forKey: .partition)
+        self.direction = try container.decode(Direction.self, forKey: .direction)
+        self.robotID = try container.decode(Int.self, forKey: .robotID)
+        self.warehouse = try container.decode(Warehouse.self, forKey: .warehouse)
     }
     
+    init(partition: Partition, direction: Direction, command: [Command], warehouse: Warehouse) {
+        self.partition = partition
+        self.direction = direction
+        self.command = command
+        self.warehouse = warehouse
+        self.robotID = Robot.robotCounter
+        Robot.robotCounter += 1
+    }
+    
+    private enum CodingKeys: String, CodingKey {
+        case partition
+        case direction
+        case command
+        case robotID
+        case warehouse
+    }
     
     
     func moveRobot(to target: Partition) {
@@ -39,6 +56,8 @@ class Robot  {
         }
         if isObstacles(at: target) || isRobot(at: target) || isWall(at: target) {
             turnRight()
+            let message = RobotMessage(senderID: robotID, partition: partition, action: .turnRight, intention: "Робот поменял направление из-за препятствия")
+            delegate?.robot(self, didSendMessage: message)
         } else {
             self.partition = target
             let message = RobotMessage(senderID: robotID, partition: partition, action: .turnRight, intention: "Передвинулся на \(partition)")
@@ -54,23 +73,44 @@ class Robot  {
       }
     
     func isObstacles(at partition: Partition) -> Bool {
-        return warehouse.obstacles.contains(where: {$0.x == partition.x && $0.y == partition.y})
+        let hasObstacles = warehouse.obstacles.contains(where: {$0.x == partition.x && $0.y == partition.y})
+                if hasObstacles {
+                    let message = RobotMessage(senderID: robotID, partition: partition, action: .turnRight, intention: "Робот обнаружил препятствие")
+                    delegate?.robot(self, didSendMessage: message)
+                }
+                return hasObstacles
     }
     
     func isRobot(at partition: Partition) -> Bool {
-        let otherRobots = warehouse.robot.filter {$0.partition == partition && $0.robotID != self.robotID }
-        return !otherRobots.isEmpty
-    }
+            for index in 0..<warehouse.robots.count {
+                let robot = warehouse.robots[index]
+                if robot.partition.x == partition.x && robot.partition.y == partition.y {
+                    robot.turnRight()
+                    let message = RobotMessage(senderID: robotID, partition: partition, action: .turnRight, intention: "Робот развернулся из-за другого робота")
+                    delegate?.robot(self, didSendMessage: message)
+                    return true
+                }
+            }
+            
+            moveRobot(to: partition)
+            return false
+        }
+    
     
     func isWall(at partition: Partition) -> Bool {
-        let isPartitionWall = warehouse.partitions.contains(where: {$0.x == partition.x && $0.y == partition.y})
-        
-        let isOutsideWarehouse = partition.x < 0 || partition.y < 0
-            || partition.x >= warehouse.dimensions.width
-            || partition.y >= warehouse.dimensions.height
-        
-        return isPartitionWall || isOutsideWarehouse
-    }
+            let isPartitionWall = warehouse.partitions.contains(where: {$0.x == partition.x && $0.y == partition.y})
+            
+            let isOutsideWarehouse = partition.x < 0 || partition.y < 0
+                || partition.x >= warehouse.dimensions.width
+                || partition.y >= warehouse.dimensions.height
+            
+            if isPartitionWall || isOutsideWarehouse {
+                let message = RobotMessage(senderID: robotID, partition: partition, action: .turnRight, intention: "Робот достиг границы склада")
+                delegate?.robot(self, didSendMessage: message)
+            }
+            
+            return isPartitionWall || isOutsideWarehouse
+        }
     
     func detectedBoxInFront() -> Int? {
         let possiblePositions = [
@@ -101,18 +141,18 @@ class Robot  {
         let targetY = box.position.y + direction.dy
         let targetPartition = Partition(x: targetX, y: targetY)
 
-        if isObstacles(at: targetPartition) || isBox(at: targetPartition) {
-            return
+       
+        if !isObstacles(at: targetPartition) && !isBox(at: targetPartition) {
+           
+            box.position.x = targetX
+            box.position.y = targetY
+            warehouse.boxes[boxIndex] = box
+            self.partition = Partition(x: targetX, y: targetY)
+
+            
+            let message = RobotMessage(senderID: robotID, partition: partition, action: .moveForward, intention: "Толкнул ящик на \(targetPartition)")
+            delegate?.robot(self, didSendMessage: message)
         }
-
-        box.position.x = targetX
-        box.position.y = targetY
-        self.partition = Partition(x: box.position.x, y: box.position.y)
-
-        warehouse.boxes[boxIndex] = box
-
-        let message = RobotMessage(senderID: robotID, partition: partition, action: .moveForward, intention: "Толкнул ящик на \(targetPartition)")
-        delegate?.robot(self, didSendMessage: message)
     }
     
     func isBox(at partition: Partition) -> Bool {

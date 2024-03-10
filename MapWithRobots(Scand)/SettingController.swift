@@ -107,18 +107,26 @@ class SettingController: UIViewController {
         }
     }
     
-    func addInitialRobots() {
+   public func addInitialRobots() {
         let warhouseMapView = WarehouseMapView()
-        let warehouse = warhouseMapView.warehouse
-        let roboCoordinates: [Partition] = [
-        Partition(x: 2, y: 1),
-        Partition(x: 3, y: 1),
-        Partition(x: 4, y: 1)
-        ]
-        for coordinate in roboCoordinates {
-            let robotView = UIImageView(image: UIImage(named: "robots.png"))
-            warhouseMapView.addRobot(at: coordinate, robotView: robotView)
-        }
+        _ = warhouseMapView.warehouse
+        
+       let robotCoordinates: [(x: Int, y: Int, id: Int)] = [
+       
+            (2,1,1),
+            (3,1,2),
+            (4,1,3)
+       ]
+       
+       for coordinate in robotCoordinates {
+               let robotView = UIImageView(image: UIImage(named: "robots.png"))
+               let robot = Robot(partition: Partition(x: coordinate.x, y: coordinate.y),
+                                 direction: .up,
+                                 command: [],
+                                 warehouse: warhouseMapView.warehouse)
+               robot.robotID = coordinate.id
+               warhouseMapView.addRobot(at: Partition(x: coordinate.x, y: coordinate.y), robotView: robotView)
+           }
     }
     
     @objc func stepperValueChanged() {
