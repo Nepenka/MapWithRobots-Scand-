@@ -9,6 +9,8 @@ import UIKit
 import SnapKit
 
 class ViewController: UIViewController {
+   
+    
     
     let settingsButton = UIButton(type: .custom)
     let warehouseMapView = WarehouseMapView()
@@ -16,6 +18,8 @@ class ViewController: UIViewController {
     let startButton = UIButton()
     var messageQueue: [RobotMessage] = []
     private var robotImageView: [UIImageView] = []
+    weak var delegate: RobotDelegate?
+    var currentRobotCount: Int = 3
     
     
     
@@ -84,32 +88,62 @@ class ViewController: UIViewController {
     
     @objc func settingsAction() {
         let vc = SettingController()
+        vc.delegate = self
         vc.modalPresentationStyle = .automatic
         present(vc, animated: true, completion: nil)
     }
+
+    
+    func updateRobotsCount(_ count: Int) {
+            currentRobotCount = count
+            warehouseMapView.clearRobots()
+            for id in 1...count {
+                let robotView = UIImageView(image: UIImage(named: "robots.png"))
+                let coordinate = (x: id, y: id, id: id)
+                let partition = Partition(x: coordinate.x, y: coordinate.y)
+                warehouseMapView.addRobot(at: partition, robotView: robotView)
+            }
+        }
+
     
     @objc func startButtonAction() {
-        
-        /*
         let warehouse = createWarehouse()
+        warehouseMapView.clearRobots()
+
         
-        let robot1 = Robot(partition: Partition(x: 0, y: 0), direction: .up, command: [], warehouse: warehouse)
-        
-        robot.delegate = self
-        
-        robot.moveRobot(to: warehouse.entrance)
-        robot.pushBoxToExit()
-        robot.detectedBoxInFront()
-         */
-        
-      
+        for _ in 1...currentRobotCount {
+            let randomX = Int.random(in: 0..<warehouse.dimensions.width)
+            let randomY = Int.random(in: 0..<warehouse.dimensions.height) 
+            let partition = Partition(x: randomX, y: randomY)
+            let robotView = UIImageView(image: UIImage(named: "robots.png"))
+            warehouseMapView.addRobot(at: partition, robotView: robotView)
+
+            let robot = Robot(partition: partition, direction: .up, command: [.turnLeft, .turnRight, .moveForward], warehouse: warehouse)
+            robot.delegate = self
+
+            let boxIndex = robot.detectedBoxInFront()
+            if boxIndex != nil {
+                let targetPartition = Partition(x: partition.x + 1, y: partition.y)
+                robot.moveRobot(to: targetPartition)
+                robot.pushBoxToExit()
+            } else {
+                let targetPartition = Partition(x: partition.x + 1, y: partition.y)
+                robot.moveRobot(to: targetPartition)
+            }
+        }
+
+        warehouseMapView.setupWarehouse(warehouse) // Обновление карты склада после создания роботов
     }
+
+
+
     
     private func updateTableView() {
+        
         tableView.reloadData()
     }
     
-    private func createWarehouse() -> Warehouse {
+    public func createWarehouse() -> Warehouse {
         let dimensions = (width: 10, height: 8)
         let entrance = (x: 2, y: 0)
         let exit = (x: 9, y: 5)
@@ -165,3 +199,11 @@ extension ViewController: RobotDelegate {
     }
 }
 
+//MARK: - SettingControllerDelegate
+
+extension ViewController: SettingControllerDelegate {
+    func didChangeRoboStepperValue(_ value: Double) {
+        
+        updateRobotsCount(Int(value))
+    }
+}

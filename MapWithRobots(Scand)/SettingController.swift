@@ -19,8 +19,8 @@ class SettingController: UIViewController {
     let countLabel = UILabel()
     let doneButton = UIButton()
     weak var delegate: SettingControllerDelegate?
+    var warehouseMapView: WarehouseMapView!
     
-
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
@@ -29,6 +29,7 @@ class SettingController: UIViewController {
         roboStepper.value = Double(initialRoboCount)
         countLabel.text = "\(Int(roboStepper.value))"
         updateRoboImages()
+        addInitialRobots()
     }
     
     func setupUI() {
@@ -66,24 +67,17 @@ class SettingController: UIViewController {
             button.left.right.equalToSuperview().inset(95)
             button.height.equalTo(60)
         }
-        
-        updateRoboImages()
-        addInitialRobots()
     }
     
-    
     func updateRoboImages() {
-        
         for roboImage in roboImages {
             roboImage.removeFromSuperview()
         }
         roboImages.removeAll()
         
-        
         let roboCount = Int(roboStepper.value)
         let imageSize = CGSize(width: 50, height: 50)
         let spacing: CGFloat = 20
-        
         var previousRoboImage: UIImageView?
         
         for _ in 0..<roboCount {
@@ -94,7 +88,7 @@ class SettingController: UIViewController {
             
             roboImage.snp.makeConstraints { image in
                 image.top.equalTo(countLabel.snp.bottom).offset(20)
-
+                
                 if let previousImage = previousRoboImage {
                     image.left.equalTo(previousImage.snp.right).offset(spacing)
                 } else {
@@ -107,26 +101,25 @@ class SettingController: UIViewController {
         }
     }
     
-   public func addInitialRobots() {
-        let warhouseMapView = WarehouseMapView()
-        _ = warhouseMapView.warehouse
+    func addInitialRobots() {
+        warehouseMapView = WarehouseMapView()
+        let viewController = ViewController()
+        let warehouse = viewController.createWarehouse()
+        let robotCoordinates: [(x: Int, y: Int, id: Int)] = [
+            (1, 1, 1),
+            (2, 2, 2),
+            (3, 3, 3)
+        ]
         
-       let robotCoordinates: [(x: Int, y: Int, id: Int)] = [
-       
-            (2,1,1),
-            (3,1,2),
-            (4,1,3)
-       ]
-       
-       for coordinate in robotCoordinates {
-               let robotView = UIImageView(image: UIImage(named: "robots.png"))
-               let robot = Robot(partition: Partition(x: coordinate.x, y: coordinate.y),
-                                 direction: .up,
-                                 command: [],
-                                 warehouse: warhouseMapView.warehouse)
-               robot.robotID = coordinate.id
-               warhouseMapView.addRobot(at: Partition(x: coordinate.x, y: coordinate.y), robotView: robotView)
-           }
+        for coordinate in robotCoordinates {
+            let robotView = UIImageView(image: UIImage(named: "robots.png"))
+            let robot = Robot(partition: Partition(x: coordinate.x, y: coordinate.y),
+                              direction: .up,
+                              command: [],
+                              warehouse: warehouse)
+            robot.robotID = coordinate.id
+            warehouseMapView.addRobot(at: Partition(x: coordinate.x, y: coordinate.y), robotView: robotView)
+        }
     }
     
     @objc func stepperValueChanged() {
@@ -146,5 +139,4 @@ class SettingController: UIViewController {
         addInitialRobots()
         dismiss(animated: true)
     }
-
 }
